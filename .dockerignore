@@ -1,0 +1,67 @@
+# Git / CI
+.git/
+.github/
+
+# Secrets
+.env
+
+# Logs & Python cache
+## Ignore all cache everywhere
+**/__pycache__/
+**/*.log
+**/*.pyc
+**/*.pyo
+**/*.pyd
+
+# Airflow generated data
+airflow/logs/
+airflow/datalake/
+
+# ML experiments
+mlruns/*
+!mlruns/787990574769484173/
+mlruns/787990574769484173/*
+!mlruns/787990574769484173/37d2cbaaf3c94eceb7e1a1bc2f09d9ea/
+!mlruns/787990574769484173/37d2cbaaf3c94eceb7e1a1bc2f09d9ea/**
+
+# Generated artifacts
+**/*.pdf
+generated_pdfs/
+
+# Data
+info/train.csv
+tmp_dataset/
+dataset/*
+!org_means.json
+
+# OS / Editor junk
+.DS_Store
+.vscode/
+.idea/
+
+# Notebooks & random files
+## Files starting with "!"
+\! BackUp Code*
+\! Note*
+\! Note - GPT*
+notebook/
+
+## One-offs
+xxx.py
+credit_risk_model.zip
+
+# Notebooks & checkpoints
+## Ignore notebooks everywhere
+**/*.ipynb
+.ipynb_checkpoints/
+
+# Dev files
+kafka_consumer.py
+kafka_producer.py
+api_predict_test.py
+
+# Misc folders
+video/
+archive/
+Two_Ngrok_Ports/
+img/

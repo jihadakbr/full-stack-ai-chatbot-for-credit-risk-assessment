@@ -1,0 +1,9 @@
+kafka-python==2.0.2
+pandas==2.0.3
+python-dotenv==1.0.1
+sqlalchemy==1.4.51
+pyspark==3.5.1
+psycopg2-binary==2.9.10
+reportlab==4.4.3
+mlflow==3.3.2
+shap==0.48.0

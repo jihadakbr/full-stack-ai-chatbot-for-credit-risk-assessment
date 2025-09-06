@@ -1,0 +1,36 @@
+# Dockerfile.airflow
+FROM apache/airflow:2.8.2-python3.10
+
+USER root
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      curl jq wget ca-certificates build-essential libpq-dev \
+  && rm -rf /var/lib/apt/lists/*
+
+# Temurin/OpenJDK 11
+RUN wget -q https://github.com/adoptium/temurin11-binaries/releases/download/jdk-11.0.25%2B9/OpenJDK11U-jdk_x64_linux_hotspot_11.0.25_9.tar.gz \
+  && mkdir -p /opt/jdk-11 \
+  && tar -xzf OpenJDK11U-jdk_x64_linux_hotspot_11.0.25_9.tar.gz -C /opt/jdk-11 --strip-components=1 \
+  && rm OpenJDK11U-jdk_x64_linux_hotspot_11.0.25_9.tar.gz \
+  && chown -R airflow:root /opt/jdk-11
+
+ENV JAVA_HOME=/opt/jdk-11
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+USER airflow
+WORKDIR /opt/airflow
+
+COPY --chown=airflow:root airflow/dags /opt/airflow/dags
+COPY --chown=airflow:root airflow/plugins /opt/airflow/plugins
+COPY --chown=airflow:root airflow/webserver_config.py /opt/airflow/webserver_config.py
+
+COPY --chown=airflow:root airflow/requirements.txt /opt/airflow/requirements.txt
+
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r /opt/airflow/requirements.txt
+    # with cache:
+    # && pip install -r /opt/airflow/requirements.txt
+    # without cache:
+    # && pip install --no-cache-dir -r /opt/airflow/requirements.txt
+
+ENV PYTHONPATH="/opt/airflow/dags:${PYTHONPATH}"

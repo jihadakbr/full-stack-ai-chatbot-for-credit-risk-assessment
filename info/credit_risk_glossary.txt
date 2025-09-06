@@ -1,0 +1,52 @@
+Credit Risk & Machine Learning Glossary
+
+1. Credit Score  
+   A numerical representation of a borrower’s creditworthiness, typically based on payment history, outstanding debt, and length of credit history.
+
+2. Default  
+   The failure of a borrower to make required payments on a loan.
+
+3. Probability of Default (PD)  
+   The likelihood that a borrower will default on a loan within a given time horizon, often estimated using predictive models.
+
+4. Interest Rate
+   The percentage charged by a lender for borrowing money, typically expressed annually.
+
+5. Credit Bureau
+   An organization that collects and maintains credit information on individuals and businesses.
+
+6. Prepayment
+   Paying off part or all of a loan before the scheduled due date, sometimes subject to conditions.
+
+7. Fair Lending  
+   Practices and regulations designed to ensure borrowers are treated equally, regardless of race, gender, age, or other protected characteristics.
+
+8. KYC (Know Your Customer)  
+   Regulatory process to verify the identity of borrowers and assess risk of illegal activities such as fraud or money laundering.
+
+9. Delinquency  
+   A situation where a borrower misses loan payments but has not yet defaulted.
+
+10. Collateral  
+    An asset pledged by a borrower to secure a loan, which may be seized if the borrower defaults.
+
+11. Portfolio Diversification  
+    Spreading credit exposure across different borrowers, industries, or geographies to reduce risk.
+
+12. Feature Engineering  
+    The process of creating, transforming, or selecting variables (features) to improve the predictive power of machine learning models.
+
+13. Model Bias  
+    Systematic errors in a machine learning model that can unfairly disadvantage certain groups of borrowers.
+
+14. Overfitting  
+    A modeling error where the algorithm performs well on training data but poorly on unseen data, reducing generalizability.
+
+15. Explainability (XAI)  
+    Techniques used to make machine learning model decisions transparent and understandable, especially important in credit decisions.
+
+16. ROC Curve & AUC  
+    Metrics used to evaluate classification models. The ROC curve shows the trade-off between true positive and false positive rates; AUC (Area Under Curve) summarizes performance.
+
+17. Responsible AI
+    The ethical use of artificial intelligence, ensuring fairness, transparency, and compliance in credit risk modeling.

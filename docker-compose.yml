@@ -1,0 +1,193 @@
+networks:
+  loan_net:
+    driver: bridge
+
+volumes:
+  airflow_logs:
+  airflow_data:
+  airflow_plugins:
+
+services:
+  ########## ZooKeeper ##########
+  zookeeper:
+    image: confluentinc/cp-zookeeper:5.2.1
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks: [loan_net]
+
+  
+  ########## Kafka 2.2.x ##########
+  kafka:
+    image: confluentinc/cp-kafka:5.2.1
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # listeners: in-network (9092) + host-access (29092)
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    ports:
+      - "29092:29092"
+    networks: [loan_net]
+    healthcheck:
+      test: ["CMD", "bash", "-lc", "cub kafka-ready -b localhost:9092 1 30"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  
+  ########## Airflow 2.8.2 (webserver) ##########  
+  airflow-webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+    image: airflow:2.8.2-java11-deps
+    container_name: airflow-webserver
+    user: "50000:0"
+    env_file: .env
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      AIRFLOW_HOME: /opt/airflow
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "False"
+      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "True"
+      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: >-
+        postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/airflow_meta
+
+      AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
+      AIRFLOW__LOGGING__PROCESSOR_LOG_LOCATION: /opt/airflow/logs/scheduler
+      AIRFLOW__LOGGING__DAG_PROCESSOR_MANAGER_LOG_LOCATION: /opt/airflow/logs/dag_processor_manager/dag_processor_manager.log
+      AIRFLOW__SCHEDULER__CHILD_PROCESS_LOG_DIRECTORY: /opt/airflow/logs/scheduler
+      AIRFLOW__LOGGING__LOGGING_CONFIG_CLASS: airflow.config_templates.airflow_local_settings.DEFAULT_LOGGING_CONFIG
+
+      # Spark / HDFS
+      JAVA_HOME: /opt/jdk-11
+      PYSPARK_PYTHON: python
+      PYSPARK_DRIVER_PYTHON: python
+      SPARK_LOCAL_IP: 127.0.0.1
+      JAVA_TOOL_OPTIONS: -Djava.net.preferIPv4Stack=true
+      HDFS_NAMENODE: host.docker.internal:9000
+      HADOOP_USER_NAME: jihadakbr
+      SPARK_HADOOP_OPTS: -Ddfs.client.use.datanode.hostname=true
+
+      # Kafka
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_TOPIC: borrowers
+
+      APP_TZ: ${APP_TZ:-Asia/Jakarta}
+
+      # MLflow tracking location
+      MLFLOW_TRACKING_DIR: /opt/airflow/mlruns
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/plugins:/opt/airflow/plugins
+      - ./mlruns:/opt/airflow/mlruns
+      - ./:/opt/project
+      - ./model_deployment:/opt/model_deployment:ro
+      - ./model_deployment:/app/model_deployment:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "DESKTOP-85G9BVS.localdomain:host-gateway"
+    command: >
+      bash -c "
+        airflow db migrate &&
+        airflow users create --role $${AIRFLOW_ADMIN_ROLE:-Admin} --username $${AIRFLOW_ADMIN_USERNAME} --password $${AIRFLOW_ADMIN_PASSWORD} --firstname $${AIRFLOW_ADMIN_FIRSTNAME} --lastname $${AIRFLOW_ADMIN_LASTNAME} --email $${AIRFLOW_ADMIN_EMAIL} || true &&
+        airflow webserver
+      "
+    ports:
+      - "8080:8080"
+    networks: [loan_net]
+
+  
+  ########## Airflow 2.8.2 (scheduler) ##########
+  airflow-scheduler:
+    image: airflow:2.8.2-java11-deps
+    container_name: airflow-scheduler
+    user: "50000:0"
+    env_file: .env
+    depends_on:
+      airflow-webserver:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    environment:
+      AIRFLOW_HOME: /opt/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: >-
+        postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/airflow_meta
+
+      AIRFLOW__LOGGING__BASE_LOG_FOLDER: /opt/airflow/logs
+      AIRFLOW__LOGGING__PROCESSOR_LOG_LOCATION: /opt/airflow/logs/scheduler
+      AIRFLOW__LOGGING__DAG_PROCESSOR_MANAGER_LOG_LOCATION: /opt/airflow/logs/dag_processor_manager/dag_processor_manager.log
+      AIRFLOW__SCHEDULER__CHILD_PROCESS_LOG_DIRECTORY: /opt/airflow/logs/scheduler
+      AIRFLOW__LOGGING__LOGGING_CONFIG_CLASS: airflow.config_templates.airflow_local_settings.DEFAULT_LOGGING_CONFIG
+
+      # Spark / HDFS
+      JAVA_HOME: /opt/jdk-11
+      PYSPARK_PYTHON: python
+      PYSPARK_DRIVER_PYTHON: python
+      SPARK_LOCAL_IP: 127.0.0.1
+      JAVA_TOOL_OPTIONS: -Djava.net.preferIPv4Stack=true
+      HDFS_NAMENODE: host.docker.internal:9000
+      HADOOP_USER_NAME: jihadakbr
+      SPARK_HADOOP_OPTS: -Ddfs.client.use.datanode.hostname=true
+
+      # MLflow tracking
+      MLFLOW_TRACKING_DIR: /opt/airflow/mlruns
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/plugins:/opt/airflow/plugins
+      - ./mlruns:/opt/airflow/mlruns
+      - ./:/opt/project
+      - ./model_deployment:/opt/model_deployment:ro
+      - ./model_deployment:/app/model_deployment:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "DESKTOP-85G9BVS.localdomain:host-gateway"
+    command: airflow scheduler
+    networks: [loan_net]
+
+
+  ########## App container ##########  
+  loan_chatbot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: loan_chatbot:latest
+    container_name: loan_chatbot
+    env_file: .env
+    depends_on:
+      kafka:
+        condition: service_healthy
+      airflow-webserver:
+        condition: service_started
+    environment:
+      MLFLOW_TRACKING_DIR: /app/mlruns
+      # Kafka inside network
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_BOOTSTRAP: kafka:9092
+      KAFKA_TOPIC: borrowers
+    volumes:
+      - ./model_deployment:/app/model_deployment:ro
+    ports:
+      - "5000:5000"
+      - "5001:5001"
+      - "4040:4040"
+    networks: [loan_net]
+

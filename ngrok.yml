@@ -1,0 +1,8 @@
+version: 2
+tunnels:
+  predict:
+    addr: 5000
+    proto: http
+  twilio_bot:
+    addr: 5001
+    proto: http

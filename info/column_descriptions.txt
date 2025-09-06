@@ -1,0 +1,74 @@
+SK_ID_CURR  
+Unique ID number for each loan application.
+
+EXT_SOURCE_1  
+A first external credit score used to assess creditworthiness.
+
+EXT_SOURCE_2  
+A second external credit score used to assess creditworthiness.
+
+EXT_SOURCE_3  
+A third external credit score used to assess creditworthiness.
+
+CODE_GENDER  
+The borrower’s gender.
+
+NAME_EDUCATION_TYPE  
+The highest level of education the borrower has completed.
+
+AMT_CREDIT  
+The total loan amount requested by the borrower.
+
+AMT_ANNUITY  
+The fixed payment amount (monthly) the borrower makes to repay the loan.
+
+GOODS_CREDIT_RATIO  
+The ratio between the price of the purchased item and the total loan amount.
+
+AMT_GOODS_PRICE  
+The price of the item being purchased with the loan (e.g., phone, car, appliance).
+
+AMT_INCOME_TOTAL  
+The borrower’s total income.
+
+NAME_FAMILY_STATUS  
+The borrower’s family situation (e.g., single, married, divorced).
+
+NAME_FAMILY_STATUS_Married  
+Specifies whether the borrower is married.
+
+DAYS_BIRTH  
+The borrower’s age in days (used to calculate actual age), relative to the time of application.
+
+DAYS_EMPLOYED  
+The number of days the borrower has been in their current job, relative to the time of application.
+
+NAME_INCOME_TYPE  
+The source of the borrower’s income (e.g., working, businessman, maternity leave).
+
+NAME_INCOME_TYPE_Working  
+Specifies whether the borrower is employed.
+
+ORGANIZATION_TYPE  
+The type of company or organization where the borrower works.
+
+ORGANIZATION_TYPE_ENCODED  
+A coded version of the borrower’s employer type (used internally).
+
+FLAG_OWN_CAR  
+Indicates whether the borrower owns a car.
+
+OWN_CAR_AGE  
+How old the borrower’s car is (in years).
+
+ATI_RATIO  
+The ratio of monthly loan payment to the borrower’s total income.
+
+LIVINGAREA_MEDI  
+Information about the borrower’s housing (such as size of apartment, building age, number of floors, etc.).
+
+DEF_30_CNT_SOCIAL_CIRCLE  
+How many people in the borrower’s social circle (friends, relatives) have defaulted on a loan by being 30+ days late.
+
+FLAG_DOCUMENT_3  
+Indicates whether the borrower provided their national ID document.

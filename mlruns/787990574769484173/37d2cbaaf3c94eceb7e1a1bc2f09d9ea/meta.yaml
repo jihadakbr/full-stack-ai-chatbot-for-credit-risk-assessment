@@ -1,0 +1,14 @@
+artifact_uri: /home/jihadakbr/Project/Home_Credit_Default_Risk/notebook/../mlruns/787990574769484173/37d2cbaaf3c94eceb7e1a1bc2f09d9ea/artifacts
+end_time: 1757172575415
+entry_point_name: ''
+experiment_id: '787990574769484173'
+lifecycle_stage: active
+run_id: 37d2cbaaf3c94eceb7e1a1bc2f09d9ea
+run_name: Production_Model
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1756541333293
+status: 3
+tags: []
+user_id: jihadakbr
