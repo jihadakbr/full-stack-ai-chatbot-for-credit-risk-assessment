@@ -48,6 +48,13 @@ RUN curl -s https://ngrok-agent.s3.amazonaws.com/ngrok.asc | tee /etc/apt/truste
  && echo "deb https://ngrok-agent.s3.amazonaws.com buster main" | tee /etc/apt/sources.list.d/ngrok.list \
  && apt-get update && apt-get install -y ngrok && rm -rf /var/lib/apt/lists/*
 
+# Clean up Python cache files and logs
+RUN find /app -name "*.pyc" -delete && \
+    find /app -name "*.pyo" -delete && \
+    find /app -name "*.pyd" -delete && \
+    find /app -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /app -name "*.log" -delete
+
 RUN chmod +x /app/start.sh
 EXPOSE 5000 5001 4040
 

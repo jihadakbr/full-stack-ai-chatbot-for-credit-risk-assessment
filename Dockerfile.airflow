@@ -33,4 +33,11 @@ RUN pip install --no-cache-dir --upgrade pip \
     # without cache:
     # && pip install --no-cache-dir -r /opt/airflow/requirements.txt
 
+# Clean up Python cache files and logs
+RUN find /opt/airflow -name "*.pyc" -delete && \
+    find /opt/airflow -name "*.pyo" -delete && \
+    find /opt/airflow -name "*.pyd" -delete && \
+    find /opt/airflow -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true && \
+    find /opt/airflow -name "*.log" -delete
+
 ENV PYTHONPATH="/opt/airflow/dags:${PYTHONPATH}"
