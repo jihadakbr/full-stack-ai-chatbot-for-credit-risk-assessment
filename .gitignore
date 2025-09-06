@@ -1,0 +1,58 @@
+# Secrets
+.env
+
+# Logs & Python cache
+__pycache__/
+*.log
+*.pyc
+*.pyo
+*.pyd
+
+# Airflow generated data
+airflow/logs/
+airflow/datalake/
+
+# ML experiments / outputs
+mlruns/*
+!mlruns/787990574769484173/
+mlruns/787990574769484173/*
+!mlruns/787990574769484173/37d2cbaaf3c94eceb7e1a1bc2f09d9ea/
+!mlruns/787990574769484173/37d2cbaaf3c94eceb7e1a1bc2f09d9ea/**
+generated_pdfs/
+
+# Data
+info/train.csv
+tmp_dataset/
+dataset/*
+!dataset/new_applicant_default_raw.csv
+!dataset/new_applicant_non_default_raw.csv
+!org_means.json
+
+# OS / Editor junk
+.DS_Store
+.vscode/
+.idea/
+
+# Notebooks & random files
+## Files starting with "!"
+\! BackUp Code*
+\! Note*
+\! Note - GPT*
+
+## Notebook folder except selected ones
+notebook/*
+!notebook/03 - EDA.ipynb
+!notebook/04 - ML.ipynb
+
+## One-offs
+officer_chatbot/xxtexx_playground.ipynb
+borrower_chatbot/xx_playground.ipynb
+xxx.py
+credit_risk_model.zip
+
+# Misc folders
+archive/
+video/
+Two_Ngrok_Ports/
+img/*
+!img/reduced/
