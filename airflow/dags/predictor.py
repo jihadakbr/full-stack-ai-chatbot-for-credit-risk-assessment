@@ -1,19 +1,13 @@
-from pyspark.sql import Row
+from credit_model import (explain_prediction, get_input_schema, get_model,
+                          get_pipeline_model, get_spark, get_top_20_features)
 from data_agg_pred import prepare_features_21
-from credit_model import (
-    get_spark,
-    get_input_schema,
-    get_pipeline_model,
-    get_model,
-    get_top_20_features,
-    explain_prediction,
-)
 from pdf_credit_report import generate_pdf
+from pyspark.sql import Row
 
 
 def _align_cast_by_schema(features: dict, schema):
-    from pyspark.sql.types import DoubleType, FloatType, LongType, IntegerType
     import pandas as pd
+    from pyspark.sql.types import DoubleType, FloatType, IntegerType, LongType
 
     def _to_py(v):
         if v is None:

@@ -1,7 +1,8 @@
-from pathlib import Path  # top
-import os
 import json
 import logging
+import os
+from pathlib import Path
+
 import requests
 import tiktoken
 from dotenv import load_dotenv
@@ -9,8 +10,9 @@ from flask import Flask, request
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
 from langchain_community.vectorstores import FAISS
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from twilio.twiml.messaging_response import MessagingResponse
+
 from borrower_chatbot.credit_questionnaire import CreditQuestionnaire
 
 logging.basicConfig(

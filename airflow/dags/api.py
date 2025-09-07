@@ -1,5 +1,6 @@
 from pathlib import Path as _Path
-from flask import Flask, request, jsonify, send_from_directory
+
+from flask import Flask, jsonify, request, send_from_directory
 from predictor import run_prediction
 
 

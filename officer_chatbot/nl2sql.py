@@ -1,12 +1,11 @@
 import re
+
 from langchain_openai import ChatOpenAI
-from officer_chatbot.telegram_utils import (
-    OPENAI_API_KEY,
-    MODEL_NAME,
-    MAX_OUTPUT_TOKENS,
-    contains_loan_keyword,
-    count_tokens,
-)  # module
+
+from officer_chatbot.telegram_utils import (MAX_OUTPUT_TOKENS,  # module
+                                            MODEL_NAME, OPENAI_API_KEY,
+                                            contains_loan_keyword,
+                                            count_tokens)
 
 COLUMNS = [
     "SK_ID_CURR",

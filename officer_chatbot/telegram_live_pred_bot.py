@@ -1,10 +1,11 @@
-import os
-import sys
 import json
 import logging
-import requests
+import os
+import sys
 from datetime import datetime
 from zoneinfo import ZoneInfo
+
+import requests
 from kafka import KafkaConsumer
 
 # Import Airflow DAG modules
@@ -14,9 +15,8 @@ project_root = os.path.abspath(
 sys.path.insert(0, project_root)
 print(f"project_root={project_root}")
 
-from airflow.dags.predictor import run_prediction  # noqa: E402
 from airflow.dags.data_agg_clean import data_agg_clean_full  # noqa: E402
-
+from airflow.dags.predictor import run_prediction  # noqa: E402
 
 # Settings (env vars)
 KAFKA_BOOTSTRAP = os.getenv("KAFKA_BOOTSTRAP", "localhost:9092")

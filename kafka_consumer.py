@@ -1,6 +1,7 @@
-import sys
-import os
 import json
+import os
+import sys
+
 from kafka import KafkaConsumer
 
 # Add the dags folder to the Python path
@@ -10,8 +11,8 @@ project_root = os.path.abspath(
 sys.path.insert(0, project_root)
 print(f"project_root={project_root}")
 
-from airflow.dags.predictor import run_prediction  # noqa: E402
 from airflow.dags.data_agg_clean import data_agg_clean_full  # noqa: E402
+from airflow.dags.predictor import run_prediction  # noqa: E402
 
 consumer = KafkaConsumer(
     "borrowers",

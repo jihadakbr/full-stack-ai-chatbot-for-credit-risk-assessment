@@ -1,5 +1,6 @@
-from pathlib import Path  # top
 import os
+from pathlib import Path  # top
+
 import psycopg2
 from dotenv import load_dotenv
 

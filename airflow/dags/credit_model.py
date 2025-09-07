@@ -1,10 +1,10 @@
-from pathlib import Path as _Path
-import os as _os
-import numpy as _np
 import json as _json
+import os as _os
+from pathlib import Path as _Path
+
+import numpy as _np
 import pandas as _pd
 from dotenv import load_dotenv
-
 
 PROJECT_ROOT = _Path(__file__).resolve().parents[2]  # Goes up 3 levels
 env_path = PROJECT_ROOT / ".env"
@@ -37,7 +37,7 @@ def get_spark():
 def get_input_schema():
     global _INPUT_SCHEMA
     if _INPUT_SCHEMA is None:
-        from pyspark.sql.types import StructType, StructField, IntegerType
+        from pyspark.sql.types import IntegerType, StructField, StructType
 
         schema_path = _project_root() / "model_deployment" / "input_schema.json"
         print(f"schema_path: {schema_path}")
@@ -59,7 +59,6 @@ def _ensure_tracking_uri():
     # Comment this for docker (Docker mode)
     # _os.environ.pop("MLFLOW_TRACKING_URI", None) # Dev mode
     # _os.environ.pop("MLFLOW_TRACKING_DIR", None) # Dev mode
-
     # if .env doesn't exist or ENV MLFLOW_TRACKING_DIR=/app/mlruns, fallback to mlruns
     tracking_dir = _os.environ.get("MLFLOW_TRACKING_DIR") or str(
         _project_root() / "mlruns"
@@ -114,8 +113,8 @@ def _kernel_predict_matrix(data):
 
 
 def explain_prediction(input_dict, model, feature_names):
-    import shap
     import pandas as pd
+    import shap
 
     df = pd.DataFrame([input_dict])[feature_names]
     if "RandomForest" in str(type(model)) or "GBTC" in str(type(model)):

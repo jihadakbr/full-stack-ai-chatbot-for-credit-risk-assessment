@@ -1,8 +1,9 @@
-from pathlib import Path  # top
-import os
 import datetime
-from reportlab.pdfgen import canvas
+import os
+from pathlib import Path  # top
+
 from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 # Layout & spacing controls
 SECTION_SPACING = 24  # vertical gap after each section

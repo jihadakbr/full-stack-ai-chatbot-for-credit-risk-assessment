@@ -1,18 +1,18 @@
-from pathlib import Path  # top
-import os
 import io
 import json
 import math
-import tiktoken
+import os
+from io import BytesIO
+from pathlib import Path  # top
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from io import BytesIO
+import tiktoken
 from dotenv import load_dotenv
-import matplotlib.pyplot as plt
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Spacer
-
+from reportlab.platypus import SimpleDocTemplate, Spacer, Table, TableStyle
 
 # Project paths
 PROJECT_ROOT = Path(__file__).resolve().parents[1]

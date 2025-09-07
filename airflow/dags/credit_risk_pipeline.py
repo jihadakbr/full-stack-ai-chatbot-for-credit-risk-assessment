@@ -1,9 +1,10 @@
 from __future__ import annotations
-from pathlib import Path
-import os
+
 import json
+import os
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 
 # Keep light imports only at parse-time
 try:
@@ -17,13 +18,13 @@ try:
 except Exception:
     load_dotenv = None
 
-from airflow import DAG
-from airflow.utils.dates import days_ago
-from airflow.operators.python import PythonOperator
-
 # Local modules
 from data_agg_clean import data_agg_clean_full
-from db import get_db_url, get_db_new_table
+from db import get_db_new_table, get_db_url
+
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from airflow.utils.dates import days_ago
 
 # Config
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -141,9 +142,9 @@ def consume_kafka_to_raw(**context):
 def clean_and_predict(**context):
     # move heavy imports here
     import pandas as pd
+    from predictor import run_prediction
     from sqlalchemy import create_engine, inspect
     from sqlalchemy.dialects.postgresql import JSONB
-    from predictor import run_prediction
 
     raw_path = Path(
         context["ti"].xcom_pull(key="raw_path", task_ids="consume_kafka_to_raw")
