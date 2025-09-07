@@ -56,3 +56,4 @@ video/
 Two_Ngrok_Ports/
 img/*
 !img/reduced/
+actions-runner/
