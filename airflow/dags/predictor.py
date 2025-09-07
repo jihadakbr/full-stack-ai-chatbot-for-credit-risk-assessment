@@ -1,10 +1,15 @@
 from pyspark.sql import Row
 from data_agg_pred import prepare_features_21
 from credit_model import (
-    get_spark, get_input_schema, get_pipeline_model,
-    get_model, get_top_20_features, explain_prediction
+    get_spark,
+    get_input_schema,
+    get_pipeline_model,
+    get_model,
+    get_top_20_features,
+    explain_prediction,
 )
 from pdf_credit_report import generate_pdf
+
 
 def _align_cast_by_schema(features: dict, schema):
     from pyspark.sql.types import DoubleType, FloatType, LongType, IntegerType
@@ -33,6 +38,7 @@ def _align_cast_by_schema(features: dict, schema):
             return 0.0 if isinstance(st, (DoubleType, FloatType)) else 0
 
     return {f.name: _coerce(features.get(f.name), f.dataType) for f in schema.fields}
+
 
 def run_prediction(user_input: dict, *, make_pdf: bool = True) -> dict:
     spark = get_spark()
@@ -77,10 +83,14 @@ def run_prediction(user_input: dict, *, make_pdf: bool = True) -> dict:
         label = "Default" if pred == 1.0 else "Non-Default"
 
     explanation = explain_prediction(feats, model, top_20)
-    explanation = dict(sorted(explanation.items(), key=lambda x: abs(x[1]), reverse=True))
+    explanation = dict(
+        sorted(explanation.items(), key=lambda x: abs(x[1]), reverse=True)
+    )
 
     # Build a percentage string like "85.62%"
-    confidence_pct_str = f"{prob_of_label * 100:.2f}%" if prob_of_label is not None else None
+    confidence_pct_str = (
+        f"{prob_of_label * 100:.2f}%" if prob_of_label is not None else None
+    )
 
     prob_text = f" ({confidence_pct_str})" if confidence_pct_str else ""
     message = (
@@ -101,6 +111,7 @@ def run_prediction(user_input: dict, *, make_pdf: bool = True) -> dict:
         payload["pdf_path"] = f"/pdfs/{pdf_filename}"
 
     return payload
+
 
 # borrower_input = {
 #     "SK_ID_CURR": 900093,

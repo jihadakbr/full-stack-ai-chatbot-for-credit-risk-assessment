@@ -2,11 +2,12 @@ from pathlib import Path as _Path
 from flask import Flask, request, jsonify, send_from_directory
 from predictor import run_prediction
 
+
 def create_app():
     app = Flask(__name__)
-    
+
     def _project_root() -> _Path:
-       return _Path(__file__).resolve().parents[2] # Goes up 3 levels
+        return _Path(__file__).resolve().parents[2]  # Goes up 3 levels
 
     @app.get("/health")
     def health():
@@ -30,6 +31,7 @@ def create_app():
         return send_from_directory(pdf_dir, filename)
 
     return app
+
 
 # # Check the path
 # with create_app().test_client() as client:

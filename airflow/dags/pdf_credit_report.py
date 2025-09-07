@@ -5,9 +5,9 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 
 # Layout & spacing controls
-SECTION_SPACING = 24          # vertical gap after each section
-PARAGRAPH_LEADING = 14        # line spacing within paragraphs / tables
-MARGIN = 72                   # 1 inch margin
+SECTION_SPACING = 24  # vertical gap after each section
+PARAGRAPH_LEADING = 14  # line spacing within paragraphs / tables
+MARGIN = 72  # 1 inch margin
 
 # Dev mode
 # PROJECT_ROOT = Path(__file__).resolve().parents[2]  # Goes up 3 levels
@@ -17,37 +17,64 @@ MARGIN = 72                   # 1 inch margin
 # Docker mode
 OUTPUT_DIR = Path(os.getenv("GENERATED_PDFS_DIR", "/opt/airflow/generated_pdfs"))
 
-FOOTER_TEXT = ("This report provides model-based explanations to aid review and is not a "
-               "standalone credit decision.")
+FOOTER_TEXT = (
+    "This report provides model-based explanations to aid review and is not a "
+    "standalone credit decision."
+)
 
 EXPLANATION_PARAGRAPHS = [
-    ("What the prediction means",
-     "“Default” means the model predicts the applicant is likely to miss loan payments or fall seriously behind within the next 12 months. "
-     "“Non-Default” means the model predicts the applicant is likely to make all loan payments on time."),
-    ("Prediction confidence (probability)",
-     "The percentage shown is the model’s confidence in the predicted class for this applicant at the time of scoring. "
-     "Examples: Default (70%) means ~70% probability of default. Non-Default (80%) means ~80% probability of NOT defaulting "
-     "(i.e., ~20% probability of default)."),
-    ("About the 20 feature contributions",
-     "Below we list up to 20 model inputs (features) that most influenced this individual prediction, ranked by impact. "
-     "Each feature has a contribution value from SHAP (a standard explainability method). The larger the absolute value, "
-     "the bigger the effect that feature had on pushing the prediction toward Default or Non-Default."),
-    ("How to read positive vs. negative values",
-     "Positive SHAP values push the prediction toward Default (higher risk). "
-     "Negative SHAP values push the prediction toward Non-Default (lower risk). "
-     "Magnitude shows strength of influence, not goodness or badness on its own."),
-    ("Important notes",
-     "• This is a model-based estimate using the information available at the time of scoring.\n"
-     "• Feature names reflect the data field used by the model. The contribution value is specific to this applicant and may differ for others.\n"
-     "• Final lending decisions should consider internal policies, additional documentation, and relevant regulations."),
+    (
+        "What the prediction means",
+        "“Default” means the model predicts the applicant is likely to miss loan payments or fall seriously behind within the next 12 months. "
+        "“Non-Default” means the model predicts the applicant is likely to make all loan payments on time.",
+    ),
+    (
+        "Prediction confidence (probability)",
+        "The percentage shown is the model’s confidence in the predicted class for this applicant at the time of scoring. "
+        "Examples: Default (70%) means ~70% probability of default. Non-Default (80%) means ~80% probability of NOT defaulting "
+        "(i.e., ~20% probability of default).",
+    ),
+    (
+        "About the 20 feature contributions",
+        "Below we list up to 20 model inputs (features) that most influenced this individual prediction, ranked by impact. "
+        "Each feature has a contribution value from SHAP (a standard explainability method). The larger the absolute value, "
+        "the bigger the effect that feature had on pushing the prediction toward Default or Non-Default.",
+    ),
+    (
+        "How to read positive vs. negative values",
+        "Positive SHAP values push the prediction toward Default (higher risk). "
+        "Negative SHAP values push the prediction toward Non-Default (lower risk). "
+        "Magnitude shows strength of influence, not goodness or badness on its own.",
+    ),
+    (
+        "Important notes",
+        "• This is a model-based estimate using the information available at the time of scoring.\n"
+        "• Feature names reflect the data field used by the model. The contribution value is specific to this applicant and may differ for others.\n"
+        "• Final lending decisions should consider internal policies, additional documentation, and relevant regulations.",
+    ),
 ]
 
 FEATURE_ORDER_20 = [
-    "EXT_SOURCE_1","GOODS_CREDIT_RATIO","EXT_SOURCE_3","EXT_SOURCE_2",
-    "ORGANIZATION_TYPE_ENCODED","DAYS_BIRTH","DAYS_EMPLOYED","NAME_EDUCATION_TYPE","CODE_GENDER",
-    "AMT_ANNUITY","AMT_CREDIT","FLAG_OWN_CAR","DAYS_ID_PUBLISH","ATI_RATIO","OWN_CAR_AGE",
-    "LIVINGAREA_MEDI","DEF_30_CNT_SOCIAL_CIRCLE","FLAG_DOCUMENT_3","NAME_FAMILY_STATUS_Married",
-    "NAME_INCOME_TYPE_Working"
+    "EXT_SOURCE_1",
+    "GOODS_CREDIT_RATIO",
+    "EXT_SOURCE_3",
+    "EXT_SOURCE_2",
+    "ORGANIZATION_TYPE_ENCODED",
+    "DAYS_BIRTH",
+    "DAYS_EMPLOYED",
+    "NAME_EDUCATION_TYPE",
+    "CODE_GENDER",
+    "AMT_ANNUITY",
+    "AMT_CREDIT",
+    "FLAG_OWN_CAR",
+    "DAYS_ID_PUBLISH",
+    "ATI_RATIO",
+    "OWN_CAR_AGE",
+    "LIVINGAREA_MEDI",
+    "DEF_30_CNT_SOCIAL_CIRCLE",
+    "FLAG_DOCUMENT_3",
+    "NAME_FAMILY_STATUS_Married",
+    "NAME_INCOME_TYPE_Working",
 ]
 
 FEATURE_GLOSSARY = {
@@ -90,6 +117,7 @@ def _ensure_output_dir() -> Path:
         fallback.mkdir(parents=True, exist_ok=True)
         return fallback
 
+
 # Footer + page-break helpers (applies footer on EVERY page)
 def _draw_footer(c, width, margin):
     c.setFont("Helvetica-Oblique", 9)
@@ -100,10 +128,12 @@ def _draw_footer(c, width, margin):
     tw = c.stringWidth(text, "Helvetica-Oblique", 9)
     c.drawString(width - margin - tw, margin - 20, text)
 
+
 def _page_break(c, width, height, margin):
     # draw footer on current page, then advance
     _draw_footer(c, width, margin)
     c.showPage()
+
 
 # Text / layout helpers
 def _wrap_text(canvas_obj, text, max_width, font_name="Helvetica", font_size=11):
@@ -123,7 +153,10 @@ def _wrap_text(canvas_obj, text, max_width, font_name="Helvetica", font_size=11)
                 # Hard-break very long word
                 piece = ""
                 for ch in w:
-                    if canvas_obj.stringWidth(piece + ch, font_name, font_size) <= max_width:
+                    if (
+                        canvas_obj.stringWidth(piece + ch, font_name, font_size)
+                        <= max_width
+                    ):
                         piece += ch
                     else:
                         if piece:
@@ -134,9 +167,21 @@ def _wrap_text(canvas_obj, text, max_width, font_name="Helvetica", font_size=11)
         lines.append(current)
     return lines
 
-def _draw_paragraph(c, text, x, y, max_width, width, height,
-                    leading=PARAGRAPH_LEADING, font="Helvetica", size=11,
-                    bottom_margin=MARGIN, spacing=SECTION_SPACING):
+
+def _draw_paragraph(
+    c,
+    text,
+    x,
+    y,
+    max_width,
+    width,
+    height,
+    leading=PARAGRAPH_LEADING,
+    font="Helvetica",
+    size=11,
+    bottom_margin=MARGIN,
+    spacing=SECTION_SPACING,
+):
     """Draw a wrapped paragraph and return updated y with section spacing."""
     c.setFont(font, size)
     lines = []
@@ -151,7 +196,10 @@ def _draw_paragraph(c, text, x, y, max_width, width, height,
         y -= leading
     return y - spacing
 
-def _draw_section_title(c, title, x, y, width, height, bottom_margin=MARGIN, spacing=SECTION_SPACING):
+
+def _draw_section_title(
+    c, title, x, y, width, height, bottom_margin=MARGIN, spacing=SECTION_SPACING
+):
     if y - 22 < bottom_margin:
         _page_break(c, width, height, bottom_margin)
         y = height - bottom_margin
@@ -166,6 +214,7 @@ def _draw_section_title(c, title, x, y, width, height, bottom_margin=MARGIN, spa
     c.drawString(x, y, title)
     return y - spacing
 
+
 def _ensure_space_or_newpage(c, y, needed, width, height, bottom_margin=MARGIN):
     """Ensure there is vertical space 'needed', else insert a page break."""
     if y - needed < bottom_margin:
@@ -173,8 +222,20 @@ def _ensure_space_or_newpage(c, y, needed, width, height, bottom_margin=MARGIN):
         return height - bottom_margin
     return y
 
-def _draw_key_value_rows(c, pairs, x, y, col_gap, max_width_right, width, height,
-                         leading=PARAGRAPH_LEADING, bottom_margin=MARGIN, spacing=SECTION_SPACING):
+
+def _draw_key_value_rows(
+    c,
+    pairs,
+    x,
+    y,
+    col_gap,
+    max_width_right,
+    width,
+    height,
+    leading=PARAGRAPH_LEADING,
+    bottom_margin=MARGIN,
+    spacing=SECTION_SPACING,
+):
     """Draw 'Key: Value' rows with wrapping on the value side; return updated y with spacing."""
     left_font = ("Helvetica-Bold", 10)
     right_font = ("Helvetica", 10)
@@ -183,7 +244,9 @@ def _draw_key_value_rows(c, pairs, x, y, col_gap, max_width_right, width, height
         c.setFont(*left_font)
         c.drawString(x, y, left)
         c.setFont(*right_font)
-        right_lines = _wrap_text(c, right, max_width_right, right_font[0], right_font[1])
+        right_lines = _wrap_text(
+            c, right, max_width_right, right_font[0], right_font[1]
+        )
 
         for rl in right_lines:
             y = _ensure_space_or_newpage(c, y, leading, width, height, bottom_margin)
@@ -191,6 +254,7 @@ def _draw_key_value_rows(c, pairs, x, y, col_gap, max_width_right, width, height
             c.drawString(x + col_gap, y, rl)
             y -= leading
     return y - spacing
+
 
 # Main
 def generate_pdf(prediction_label, prob_percentage, explanation_dict):
@@ -225,7 +289,7 @@ def generate_pdf(prediction_label, prob_percentage, explanation_dict):
     y -= 45
 
     c.setFont("Helvetica", 11)
-    now_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     c.drawString(x, y, f"Generated on: {now_str} (GMT+7)")
     y -= 25
 
@@ -245,8 +309,7 @@ def generate_pdf(prediction_label, prob_percentage, explanation_dict):
     text_width = c.stringWidth(result_text, "Helvetica-Bold", 12)
 
     c.setFillColorRGB(1, 1, 0)  # yellow
-    c.rect(highlight_x - 2, highlight_y - 2,
-        text_width + 4, 16, fill=1, stroke=0)
+    c.rect(highlight_x - 2, highlight_y - 2, text_width + 4, 16, fill=1, stroke=0)
 
     c.setFillColorRGB(0, 0, 0)  # reset
     c.drawString(highlight_x, highlight_y, result_text)
@@ -263,12 +326,26 @@ def generate_pdf(prediction_label, prob_percentage, explanation_dict):
     x = MARGIN
 
     # Feature contributions (SHAP)
-    y = _draw_section_title(c, "Feature contributions for this applicant (SHAP)", x, y, width, height)
+    y = _draw_section_title(
+        c, "Feature contributions for this applicant (SHAP)", x, y, width, height
+    )
     legend = "Positive value → higher risk (pushes toward Default) \nNegative value → lower risk (pushes toward Non-Default)"
-    y = _draw_paragraph(c, legend, x, y, max_text_width, width, height, font="Helvetica-Oblique", size=11)
+    y = _draw_paragraph(
+        c,
+        legend,
+        x,
+        y,
+        max_text_width,
+        width,
+        height,
+        font="Helvetica-Oblique",
+        size=11,
+    )
 
     # Sort by absolute SHAP value (desc) and take top 20
-    explanation_dict = dict(sorted(explanation_dict.items(), key=lambda x: abs(x[1]), reverse=True))
+    explanation_dict = dict(
+        sorted(explanation_dict.items(), key=lambda x: abs(x[1]), reverse=True)
+    )
     top_items = list(explanation_dict.items())[:20]
 
     display_pairs = []
@@ -280,23 +357,38 @@ def generate_pdf(prediction_label, prob_percentage, explanation_dict):
     col_gap = 180
     max_width_right = max_text_width - col_gap
     y = _draw_key_value_rows(
-        c, display_pairs, x, y, col_gap, max_width_right, width, height,
-        leading=PARAGRAPH_LEADING, bottom_margin=MARGIN, spacing=SECTION_SPACING
+        c,
+        display_pairs,
+        x,
+        y,
+        col_gap,
+        max_width_right,
+        width,
+        height,
+        leading=PARAGRAPH_LEADING,
+        bottom_margin=MARGIN,
+        spacing=SECTION_SPACING,
     )
 
     # Inserted explanatory note about SHAP
-    shap_note = ("Note: SHAP values show how a feature’s actual value pushes risk up or down relative to others.\n"
-                 "• If EXT_SOURCE_1 = 0.7 and SHAP = +0.3 (↑ risk), then despite 0.7 being a decent score, for this applicant it’s low compared to others, so it increases risk.\n"
-                 "• If EXT_SOURCE_1 = 0.7 and SHAP = –0.3 (↓ risk), then 0.7 is relatively high compared to others, so it reduces risk.\n")
-    y = _draw_paragraph(c, shap_note, x, y, max_text_width, width, height, font="Helvetica", size=11)
+    shap_note = (
+        "Note: SHAP values show how a feature’s actual value pushes risk up or down relative to others.\n"
+        "• If EXT_SOURCE_1 = 0.7 and SHAP = +0.3 (↑ risk), then despite 0.7 being a decent score, for this applicant it’s low compared to others, so it increases risk.\n"
+        "• If EXT_SOURCE_1 = 0.7 and SHAP = –0.3 (↓ risk), then 0.7 is relatively high compared to others, so it reduces risk.\n"
+    )
+    y = _draw_paragraph(
+        c, shap_note, x, y, max_text_width, width, height, font="Helvetica", size=11
+    )
 
     # Force new page before Feature glossary
     _page_break(c, width, height, MARGIN)
     y = height - MARGIN
     x = MARGIN
 
-    y = _draw_section_title(c, "Feature name glossary (plain-English)", x, y, width, height)
-    intro = ("Short descriptions of each field to help interpretation.")
+    y = _draw_section_title(
+        c, "Feature name glossary (plain-English)", x, y, width, height
+    )
+    intro = "Short descriptions of each field to help interpretation."
     y = _draw_paragraph(c, intro, x, y, max_text_width, width, height, size=11)
 
     glossary_pairs = []
@@ -306,12 +398,20 @@ def generate_pdf(prediction_label, prob_percentage, explanation_dict):
         glossary_pairs.append((f"{feat}:", desc))
 
     y = _draw_key_value_rows(
-        c, glossary_pairs, x, y, col_gap, max_width_right, width, height,
-        leading=PARAGRAPH_LEADING, bottom_margin=MARGIN, spacing=SECTION_SPACING
+        c,
+        glossary_pairs,
+        x,
+        y,
+        col_gap,
+        max_width_right,
+        width,
+        height,
+        leading=PARAGRAPH_LEADING,
+        bottom_margin=MARGIN,
+        spacing=SECTION_SPACING,
     )
 
     # Footer on LAST page
     _draw_footer(c, width, MARGIN)
     c.save()
     return filename
-

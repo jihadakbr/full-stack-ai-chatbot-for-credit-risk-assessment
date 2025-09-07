@@ -1,4 +1,4 @@
-from pathlib import Path # top
+from pathlib import Path  # top
 import os
 import psycopg2
 from dotenv import load_dotenv
@@ -9,14 +9,16 @@ env_path = PROJECT_ROOT / ".env"
 
 load_dotenv(dotenv_path=env_path, override=True)
 
+
 def get_connection():
     return psycopg2.connect(
         host=os.getenv("DB_HOST"),
         port=os.getenv("DB_PORT"),
         dbname=os.getenv("DB_DATABASE"),
         user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASSWORD")
+        password=os.getenv("DB_PASSWORD"),
     )
+
 
 def query_db(sql):
     conn = get_connection()
@@ -28,6 +30,7 @@ def query_db(sql):
     conn.close()
     return result, colnames
 
+
 def get_db_url():
     """Return SQLAlchemy-compatible PostgreSQL URL using environment variables."""
     db_user = os.getenv("DB_USER")
@@ -36,7 +39,10 @@ def get_db_url():
     db_port = os.getenv("DB_PORT")
     db_name = os.getenv("DB_DATABASE")
 
-    return f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    return (
+        f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    )
+
 
 def get_db_new_table():
     """Return the new table name from environment."""

@@ -33,15 +33,13 @@ if load_dotenv is not None and env_path.exists():
 
 # Prefer KAFKA_BOOTSTRAP_SERVERS, fallback to KAFKA_BOOTSTRAP, default to in-network
 KAFKA_BOOTSTRAP = (
-    os.getenv("KAFKA_BOOTSTRAP_SERVERS")
-    or os.getenv("KAFKA_BOOTSTRAP")
-    or "kafka:9092"
+    os.getenv("KAFKA_BOOTSTRAP_SERVERS") or os.getenv("KAFKA_BOOTSTRAP") or "kafka:9092"
 )
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "borrowers")
 
 AIRFLOW_HOME = Path(os.getenv("AIRFLOW_HOME", str(Path.home() / "airflow-local")))
 DATA_ROOT = AIRFLOW_HOME / "datalake"
-RAW_DIR   = DATA_ROOT / "raw"
+RAW_DIR = DATA_ROOT / "raw"
 CLEAN_DIR = DATA_ROOT / "clean"
 RAW_DIR.mkdir(parents=True, exist_ok=True)
 CLEAN_DIR.mkdir(parents=True, exist_ok=True)
@@ -85,7 +83,7 @@ def consume_kafka_to_raw(**context):
         group_id="airflow_credit_pipeline",
         consumer_timeout_ms=8000,
         value_deserializer=lambda m: json.loads(m.decode("utf-8")),
-        max_poll_interval_ms=600000
+        max_poll_interval_ms=600000,
     )
 
     records = []
@@ -114,8 +112,7 @@ def consume_kafka_to_raw(**context):
     nn = os.getenv("HDFS_NAMENODE", "localhost:9000")
 
     spark = (
-        SparkSession.builder
-        .master(os.getenv("SPARK_MASTER", "local[*]"))
+        SparkSession.builder.master(os.getenv("SPARK_MASTER", "local[*]"))
         .config("spark.ui.enabled", "false")
         .config("spark.driver.extraJavaOptions", "-Djava.net.preferIPv4Stack=true")
         .config("spark.executor.extraJavaOptions", "-Djava.net.preferIPv4Stack=true")
@@ -148,7 +145,9 @@ def clean_and_predict(**context):
     from sqlalchemy.dialects.postgresql import JSONB
     from predictor import run_prediction
 
-    raw_path = Path(context["ti"].xcom_pull(key="raw_path", task_ids="consume_kafka_to_raw"))
+    raw_path = Path(
+        context["ti"].xcom_pull(key="raw_path", task_ids="consume_kafka_to_raw")
+    )
     if not raw_path.exists() or raw_path.stat().st_size == 0:
         print("[clean_and_predict] No raw file or empty file; nothing to process.")
         return None
@@ -156,7 +155,9 @@ def clean_and_predict(**context):
     df = pd.read_json(raw_path, lines=True)
 
     try:
-        df_agg = pd.DataFrame([data_agg_clean_full(row) for row in df.to_dict(orient="records")])
+        df_agg = pd.DataFrame(
+            [data_agg_clean_full(row) for row in df.to_dict(orient="records")]
+        )
     except Exception as e:
         print(f"[clean_and_predict] Error applying data_agg_clean_full: {e}")
         return None
@@ -202,9 +203,15 @@ def clean_and_predict(**context):
 
             df_columns = df_agg.columns.tolist()
             missing_in_pg = [c for c in df_columns if c not in pg_columns]
-            extra_in_pg   = [c for c in pg_columns if c not in df_columns]
-            print("[clean_and_predict] Columns in DataFrame but NOT in PostgreSQL:", missing_in_pg)
-            print("[clean_and_predict] Columns in PostgreSQL but NOT in DataFrame:", extra_in_pg)
+            extra_in_pg = [c for c in pg_columns if c not in df_columns]
+            print(
+                "[clean_and_predict] Columns in DataFrame but NOT in PostgreSQL:",
+                missing_in_pg,
+            )
+            print(
+                "[clean_and_predict] Columns in PostgreSQL but NOT in DataFrame:",
+                extra_in_pg,
+            )
 
             write_cols = [c for c in df_columns if c in pg_columns]
             if write_cols:
@@ -216,13 +223,16 @@ def clean_and_predict(**context):
                     if_exists="append",
                     index=False,
                     method="multi",
-                    dtype={k: v for k, v in dtype_map.items() if k in write_cols} or None,
+                    dtype={k: v for k, v in dtype_map.items() if k in write_cols}
+                    or None,
                 )
                 print("[clean_and_predict] Data appended into PostgreSQL.")
             else:
                 print("[clean_and_predict] No overlapping columns; nothing to write.")
         else:
-            print(f"[clean_and_predict] Destination table {schema}.{new_table} does not exist; creating it.")
+            print(
+                f"[clean_and_predict] Destination table {schema}.{new_table} does not exist; creating it."
+            )
             df_to_write = df_agg.copy()
             df_to_write.to_sql(
                 name=new_table,
@@ -233,7 +243,9 @@ def clean_and_predict(**context):
                 method="multi",
                 dtype=dtype_map or None,
             )
-            print("[clean_and_predict] Table created and data inserted into PostgreSQL.")
+            print(
+                "[clean_and_predict] Table created and data inserted into PostgreSQL."
+            )
     except Exception as e:
         print(f"[clean_and_predict] Error while writing to PostgreSQL: {e}")
         raise
@@ -244,6 +256,8 @@ def clean_and_predict(**context):
 
 
 with dag:
-    t1 = PythonOperator(task_id="consume_kafka_to_raw", python_callable=consume_kafka_to_raw)
+    t1 = PythonOperator(
+        task_id="consume_kafka_to_raw", python_callable=consume_kafka_to_raw
+    )
     t2 = PythonOperator(task_id="clean_and_predict", python_callable=clean_and_predict)
     t1 >> t2

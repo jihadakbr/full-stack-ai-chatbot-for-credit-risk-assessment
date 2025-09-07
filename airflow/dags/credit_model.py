@@ -21,7 +21,7 @@ RUN_ID = _os.getenv("MLFLOW_RUN_ID")
 
 
 def _project_root() -> _Path:
-    return _Path(__file__).resolve().parents[2] # Goes up 3 levels
+    return _Path(__file__).resolve().parents[2]  # Goes up 3 levels
 
 
 # Initialize Spark
@@ -29,6 +29,7 @@ def get_spark():
     global _SPARK
     if _SPARK is None:
         from pyspark.sql import SparkSession
+
         _SPARK = SparkSession.builder.appName("BorrowerChatbot").getOrCreate()
     return _SPARK
 
@@ -37,12 +38,15 @@ def get_input_schema():
     global _INPUT_SCHEMA
     if _INPUT_SCHEMA is None:
         from pyspark.sql.types import StructType, StructField, IntegerType
+
         schema_path = _project_root() / "model_deployment" / "input_schema.json"
         print(f"schema_path: {schema_path}")
         with open(schema_path, "r") as f:
             schema_json = _json.load(f)
         base = StructType.fromJson(schema_json)
-        _INPUT_SCHEMA = StructType([StructField("SK_ID_CURR", IntegerType(), False)] + base.fields)
+        _INPUT_SCHEMA = StructType(
+            [StructField("SK_ID_CURR", IntegerType(), False)] + base.fields
+        )
     return _INPUT_SCHEMA
 
 
@@ -51,12 +55,15 @@ def get_input_schema():
 
 def _ensure_tracking_uri():
     import mlflow
+
     # Comment this for docker (Docker mode)
     # _os.environ.pop("MLFLOW_TRACKING_URI", None) # Dev mode
     # _os.environ.pop("MLFLOW_TRACKING_DIR", None) # Dev mode
 
     # if .env doesn't exist or ENV MLFLOW_TRACKING_DIR=/app/mlruns, fallback to mlruns
-    tracking_dir = _os.environ.get("MLFLOW_TRACKING_DIR") or str(_project_root() / "mlruns")
+    tracking_dir = _os.environ.get("MLFLOW_TRACKING_DIR") or str(
+        _project_root() / "mlruns"
+    )
     print(f"tracking_dir: {tracking_dir}")
     mlflow.set_tracking_uri(f"file://{_os.path.abspath(tracking_dir)}")
     return tracking_dir, mlflow
@@ -101,12 +108,15 @@ def _kernel_predict_matrix(data):
     top_20 = get_top_20_features()
     sdf = spark.createDataFrame(_pd.DataFrame(data, columns=top_20), schema=schema)
     preds = pipeline.transform(sdf)
-    return _np.array([row['probability'][1] for row in preds.select('probability').collect()])
+    return _np.array(
+        [row["probability"][1] for row in preds.select("probability").collect()]
+    )
 
 
 def explain_prediction(input_dict, model, feature_names):
     import shap
     import pandas as pd
+
     df = pd.DataFrame([input_dict])[feature_names]
     if "RandomForest" in str(type(model)) or "GBTC" in str(type(model)):
         explainer = shap.TreeExplainer(model)
@@ -118,4 +128,3 @@ def explain_prediction(input_dict, model, feature_names):
         print("===== Non Tree-Based Model =====")
     out = {col: float(shap_values[i]) for i, col in enumerate(df.columns)}
     return dict(sorted(out.items(), key=lambda x: abs(x[1]), reverse=True))
-

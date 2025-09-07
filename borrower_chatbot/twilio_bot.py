@@ -1,4 +1,4 @@
-from pathlib import Path # top
+from pathlib import Path  # top
 import os
 import json
 import logging
@@ -14,8 +14,7 @@ from twilio.twiml.messaging_response import MessagingResponse
 from borrower_chatbot.credit_questionnaire import CreditQuestionnaire
 
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 
 app = Flask(__name__)
@@ -28,7 +27,8 @@ load_dotenv(dotenv_path=env_path, override=True)
 vectorstore_path = PROJECT_ROOT / "rag_vectorstore"
 keywords_path = PROJECT_ROOT / "info" / "keywords.json"
 
-ngrok1_url = os.getenv("NGROK1_URL", "https://a4f971f433ad.ngrok-free.app") # Docker or Dev mode
+# Docker or Dev mode
+ngrok1_url = os.getenv("NGROK1_URL", "https://a4f971f433ad.ngrok-free.app")
 
 PREDICT_URL = "http://localhost:5000/predict"
 MEDIA_URL = f"{ngrok1_url}/pdfs/credit_report.pdf"
@@ -51,7 +51,7 @@ vectorstore = FAISS.load_local(
     vectorstore_path,
     embeddings,
     index_name="index",
-    allow_dangerous_deserialization=True
+    allow_dangerous_deserialization=True,
 )
 
 retriever = vectorstore.as_retriever(
@@ -71,7 +71,7 @@ QA_PROMPT = PromptTemplate(
         "You are FlexiLoan’s assistant (Flexi). Answer as the company in first-person plural "
         "(we/our/us). Do not use third person (no they/their/them). "
         "Base the answer ONLY on the context. If the answer isn’t in the context, say: "
-        "\"I don’t have that information yet.\" Use concise bullets when appropriate.\n\n"
+        '"I don’t have that information yet." Use concise bullets when appropriate.\n\n'
         "Question: {question}\n\nContext:\n{context}\n\nAnswer:"
     ),
 )
@@ -86,7 +86,7 @@ qa_chain = RetrievalQA.from_chain_type(
     retriever=retriever,
     chain_type="stuff",
     chain_type_kwargs={"prompt": QA_PROMPT},
-    return_source_documents=False,   # Turn on (TRUE) while testing. True/False
+    return_source_documents=False,  # Turn on (TRUE) while testing. True/False
 )
 
 with open(keywords_path, "r") as f:
@@ -96,19 +96,22 @@ with open(keywords_path, "r") as f:
 LOAN_KEYWORDS = [kw.lower() for kw in keywords["loan_keywords"]]
 REGISTRATION_KEYWORDS = [kw.lower() for kw in keywords["registration_keywords"]]
 
+
 def count_tokens_from_string(text, model=MODEL_NAME):
     encoding = tiktoken.encoding_for_model(model)
     return len(encoding.encode(text))
 
+
 def estimate_cost(input_tokens, output_tokens):
-    cost = (
-        (input_tokens / 1000) * PRICE_PER_1K_INPUT_TOKENS +
-        (output_tokens / 1000) * PRICE_PER_1K_OUTPUT_TOKENS
-    )
+    cost = (input_tokens / 1000) * PRICE_PER_1K_INPUT_TOKENS + (
+        output_tokens / 1000
+    ) * PRICE_PER_1K_OUTPUT_TOKENS
     return round(cost, 6)
+
 
 def contains_keyword(message, keywords):
     return any(word in message.lower() for word in keywords)
+
 
 def send_telegram_message(sender_phone_raw: str, user_text: str):
     try:
@@ -122,31 +125,49 @@ def send_telegram_message(sender_phone_raw: str, user_text: str):
                 f"From: {display_phone}\n"
                 "Via: WhatsApp\n"
                 f"Message: “{user_text.strip()}”"
-            )
+            ),
         }
         response = requests.post(url, json=payload)
         print(f"✅ Telegram sent: {response.status_code}")
     except Exception as e:
         print(f"❌ Telegram send failed: {e}")
 
+
 # simple in-memory per-sender state
 SESSIONS: dict[str, CreditQuestionnaire] = {}
 
 # helpers for credit intent & cancel
 CREDIT_INTENT_PHRASES = {
-    "credit", "credit check", "risk check", "credit risk", "predict", "prediction",
-    "loan risk", "start credit", "check credit", "credit scoring"
+    "credit",
+    "credit check",
+    "risk check",
+    "credit risk",
+    "predict",
+    "prediction",
+    "loan risk",
+    "start credit",
+    "check credit",
+    "credit scoring",
 }
 CANCEL_PHRASES = {"cancel", "stop", "quit", "exit"}
 
+
 def _is_credit_intent(text: str):
     t = text.strip().lower()
-    return t in CREDIT_INTENT_PHRASES or t.startswith("credit ") or "credit check" in t or "risk" in t and "credit" in t
+    return (
+        t in CREDIT_INTENT_PHRASES
+        or t.startswith("credit ")
+        or "credit check" in t
+        or "risk" in t
+        and "credit" in t
+    )
+
 
 def _start_credit_flow(sender: str):
     q = CreditQuestionnaire()
     SESSIONS[sender] = q
     return q.start()
+
 
 def _handle_credit_flow(sender: str, user_text: str):
     q = SESSIONS.get(sender)
@@ -169,6 +190,7 @@ def _handle_credit_flow(sender: str, user_text: str):
             return True, f"⚠️ Error during prediction: {e}", False
     else:
         return ok, reply, False
+
 
 def _format_id_phone(raw: str) -> str:
     """
@@ -205,10 +227,11 @@ def _format_id_phone(raw: str) -> str:
         group2 = rest[4:]
         return f"+62 {op}-{group1}-{group2}"
 
+
 @app.route("/whatsapp", methods=["POST"])
 def whatsapp_bot():
-    incoming_msg = request.values.get('Body', '').strip()
-    sender = request.values.get('From')
+    incoming_msg = request.values.get("Body", "").strip()
+    sender = request.values.get("From")
 
     print(f"📨 Received WhatsApp message: '{incoming_msg}' from {sender}")
 
@@ -260,12 +283,16 @@ def whatsapp_bot():
     # Registration Intent
     elif contains_keyword(lower_msg, REGISTRATION_KEYWORDS):
         send_telegram_message(sender, incoming_msg)
-        msg.body("✅ Thanks! We've informed our loan officer. They’ll contact you shortly.")
+        msg.body(
+            "✅ Thanks! We've informed our loan officer. They’ll contact you shortly."
+        )
         return str(resp)
 
     # Non-Loan Topics
     elif not contains_keyword(lower_msg, LOAN_KEYWORDS):
-        msg.body("❌ Sorry, I can only answer loan-related questions. Please ask something about your credit or loan application.")
+        msg.body(
+            "❌ Sorry, I can only answer loan-related questions. Please ask something about your credit or loan application."
+        )
         return str(resp)
 
     # Handle general questions using RAG
@@ -281,7 +308,9 @@ def whatsapp_bot():
                 print(f"===== Attribute missing: {e}")
                 # print(f"\n==== docs: {docs}\n")
 
-            input_text = lower_msg + "\n\n" + "\n\n".join([doc.page_content for doc in docs])
+            input_text = (
+                lower_msg + "\n\n" + "\n\n".join([doc.page_content for doc in docs])
+            )
             input_tokens = count_tokens_from_string(input_text)
 
             qa_out = qa_chain.invoke({"query": lower_msg})
@@ -289,7 +318,9 @@ def whatsapp_bot():
 
             output_tokens = count_tokens_from_string(rag_answer or "")
             total_cost = estimate_cost(input_tokens, output_tokens)
-            print(f"🔢 [RAG] Input tokens: {input_tokens}, Output tokens: {output_tokens}, Cost: ${total_cost}")
+            print(
+                f"🔢 [RAG] Input tokens: {input_tokens}, Output tokens: {output_tokens}, Cost: ${total_cost}"
+            )
 
             if not rag_answer or len(rag_answer.strip()) < 20:
                 raise ValueError("RAG gave a weak or empty response")
@@ -304,4 +335,3 @@ def whatsapp_bot():
 
 if __name__ == "__main__":
     app.run(port=5001)
-
