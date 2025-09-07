@@ -1,5 +1,11 @@
-from credit_model import (explain_prediction, get_input_schema, get_model,
-                          get_pipeline_model, get_spark, get_top_20_features)
+from credit_model import (
+    explain_prediction,
+    get_input_schema,
+    get_model,
+    get_pipeline_model,
+    get_spark,
+    get_top_20_features,
+)
 from data_agg_pred import prepare_features_21
 from pdf_credit_report import generate_pdf
 from pyspark.sql import Row

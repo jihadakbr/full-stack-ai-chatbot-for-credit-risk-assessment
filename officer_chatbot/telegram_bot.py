@@ -6,21 +6,32 @@ from langchain.prompts import PromptTemplate
 from langchain_community.vectorstores import FAISS
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from telegram import InputFile, Update
-from telegram.ext import (ApplicationBuilder, CommandHandler, ContextTypes,
-                          MessageHandler, filters)
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    ContextTypes,
+    MessageHandler,
+    filters,
+)
 
 from airflow.dags.db import query_db  # module
 from officer_chatbot.nl2sql import natural_to_sql  # module
-from officer_chatbot.telegram_utils import (EMBED_MODEL,  # module
-                                            MAX_OUTPUT_TOKENS, MODEL_NAME,
-                                            OPENAI_API_KEY, TELEGRAM_TOKEN,
-                                            VECTORSTORE_PATH,
-                                            contains_loan_keyword,
-                                            count_tokens, estimate_cost,
-                                            generate_bar, generate_histogram,
-                                            generate_pdf,
-                                            generate_pie_chart_target,
-                                            generate_scatter)
+from officer_chatbot.telegram_utils import (
+    EMBED_MODEL,  # module
+    MAX_OUTPUT_TOKENS,
+    MODEL_NAME,
+    OPENAI_API_KEY,
+    TELEGRAM_TOKEN,
+    VECTORSTORE_PATH,
+    contains_loan_keyword,
+    count_tokens,
+    estimate_cost,
+    generate_bar,
+    generate_histogram,
+    generate_pdf,
+    generate_pie_chart_target,
+    generate_scatter,
+)
 
 # Logging
 logging.basicConfig(
