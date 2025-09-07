@@ -95,7 +95,6 @@ def get_top_20_features():
 
 
 def _kernel_predict_matrix(data):
-    from pyspark.sql import Row
     spark = get_spark()
     schema = get_input_schema()
     pipeline = get_pipeline_model()
@@ -106,7 +105,8 @@ def _kernel_predict_matrix(data):
 
 
 def explain_prediction(input_dict, model, feature_names):
-    import shap, pandas as pd
+    import shap
+    import pandas as pd
     df = pd.DataFrame([input_dict])[feature_names]
     if "RandomForest" in str(type(model)) or "GBTC" in str(type(model)):
         explainer = shap.TreeExplainer(model)

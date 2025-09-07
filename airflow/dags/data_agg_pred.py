@@ -127,10 +127,15 @@ def prepare_features_21(raw: dict) -> dict:
     # Encoding of FLAG_OWN_CAR
     def _own_car_to_num(v):
         s = str(v).strip().upper()
-        if s == "Y": return 1
-        if s == "N": return 0
-        try: return int(v)
-        except Exception: return np.nan
+        if s == "Y":
+            return 1
+        if s == "N":
+            return 0
+        try:
+            return int(v)
+        except Exception:
+            return np.nan
+
     df["FLAG_OWN_CAR"] = df["FLAG_OWN_CAR"].apply(_own_car_to_num)
 
     # Agg of ATI_RATIO

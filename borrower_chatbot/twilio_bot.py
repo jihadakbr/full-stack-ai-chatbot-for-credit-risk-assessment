@@ -276,7 +276,7 @@ def whatsapp_bot():
             try:
                 docs = retriever.invoke(lower_msg)
                 print(f"\n==== docs: {docs}\n")
-            except AttributeError:
+            except AttributeError as e:
                 docs = retriever.get_relevant_documents(lower_msg)
                 print(f"===== Attribute missing: {e}")
                 # print(f"\n==== docs: {docs}\n")

@@ -1,4 +1,3 @@
-import pandas as pd
 from pyspark.sql import Row
 from data_agg_pred import prepare_features_21
 from credit_model import (
@@ -55,7 +54,7 @@ def run_prediction(user_input: dict, *, make_pdf: bool = True) -> dict:
     result_df = pipeline.transform(sdf)
 
     prob_of_label = None
-    class_probs = None
+    # class_probs = None
 
     if "probability" in result_df.columns:
         row = result_df.select("prediction", "probability").collect()[0]
@@ -72,7 +71,7 @@ def run_prediction(user_input: dict, *, make_pdf: bool = True) -> dict:
         }
         label = "Default" if pred == 1.0 else "Non-Default"
         prob_of_label = probs.get(label)
-        class_probs = probs
+        # class_probs = probs
     else:
         pred = float(result_df.select("prediction").collect()[0][0])
         label = "Default" if pred == 1.0 else "Non-Default"

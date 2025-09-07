@@ -5,8 +5,8 @@ import pandas as pd
 from kafka import KafkaProducer
 
 producer = KafkaProducer(
-    # bootstrap_servers='localhost:9092', # Dev Mode 
-    bootstrap_servers='localhost:29092', # Docker Mode
+    bootstrap_servers='localhost:9092', # Dev Mode 
+    # bootstrap_servers='localhost:29092', # Docker Mode
     value_serializer=lambda v: json.dumps(v).encode('utf-8')
 )
 

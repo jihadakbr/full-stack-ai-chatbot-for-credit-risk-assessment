@@ -1,6 +1,8 @@
 from __future__ import annotations
 from pathlib import Path
-import os, json, time
+import os
+import json
+import time
 from datetime import datetime, timezone
 
 # Keep light imports only at parse-time
@@ -95,7 +97,8 @@ def consume_kafka_to_raw(**context):
                 msg = next(consumer)
                 rec = msg.value
                 records.append(rec)
-                json.dump(rec, f); f.write("\n")
+                json.dump(rec, f)
+                f.write("\n")
                 count += 1
             except StopIteration:
                 time.sleep(1)

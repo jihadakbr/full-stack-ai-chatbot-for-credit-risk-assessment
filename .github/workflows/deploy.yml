@@ -31,8 +31,8 @@ jobs:
 
       - name: Generate .env from Secrets
         run: |
-          cat > .env <<'EOF'
-          # Database for Airflow
+          cat > .env <<EOF
+          # ----- Database (external) -----
           DB_ADMIN_NAME=${DB_ADMIN_NAME}
           DB_USER=${DB_USER}
           DB_PASSWORD=${DB_PASSWORD}
@@ -41,37 +41,40 @@ jobs:
           DB_NEW_TABLE=${DB_NEW_TABLE}
           DB_HOST=${DB_HOST}
 
-          # Airflow
+          # ----- Airflow admin -----
           AIRFLOW_ADMIN_USERNAME=${AIRFLOW_ADMIN_USERNAME}
           AIRFLOW_ADMIN_PASSWORD=${AIRFLOW_ADMIN_PASSWORD}
           AIRFLOW_ADMIN_FIRSTNAME=${AIRFLOW_ADMIN_FIRSTNAME}
           AIRFLOW_ADMIN_LASTNAME=${AIRFLOW_ADMIN_LASTNAME}
           AIRFLOW_ADMIN_EMAIL=${AIRFLOW_ADMIN_EMAIL}
+
+          # ----- Airflow security -----
           AIRFLOW__CORE__FERNET_KEY=${AIRFLOW__CORE__FERNET_KEY}
           AIRFLOW__WEBSERVER__SECRET_KEY=${AIRFLOW__WEBSERVER__SECRET_KEY}
           CRON_PRED_SCHEDULE=${CRON_PRED_SCHEDULE}
 
-          # Other
+          # ----- Models / OpenAI -----
           OPENAI_MODEL=${OPENAI_MODEL}
           OPENAI_EMBED_MODEL=${OPENAI_EMBED_MODEL}
           MAX_OUTPUT_TOKENS=${MAX_OUTPUT_TOKENS}
           OPENAI_API_KEY=${OPENAI_API_KEY}
-            
-          NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
 
+          # ----- Tunnels / Tracking -----
+          NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
           MLFLOW_EXPERIMENT_ID=${MLFLOW_EXPERIMENT_ID}
           MLFLOW_RUN_ID=${MLFLOW_RUN_ID}
 
+          # ----- Twilio / Telegram -----
           TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
           TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
           TWILIO_WHATSAPP_NUMBER=${TWILIO_WHATSAPP_NUMBER}
           TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
           MY_WHATSAPP_NUMBER=${MY_WHATSAPP_NUMBER}
-
           TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
           TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
           TELEGRAM_LIVE_BOT_TOKEN=${TELEGRAM_LIVE_BOT_TOKEN}
 
+          # ----- Misc -----
           APP_TZ=${APP_TZ}
           HDFS_NAMENODE=${HDFS_NAMENODE}
           EOF
@@ -83,21 +86,26 @@ jobs:
           DB_DATABASE: ${{ secrets.DB_DATABASE }}
           DB_NEW_TABLE: ${{ secrets.DB_NEW_TABLE }}
           DB_HOST: ${{ secrets.DB_HOST }}
+
           AIRFLOW_ADMIN_USERNAME: ${{ secrets.AIRFLOW_ADMIN_USERNAME }}
           AIRFLOW_ADMIN_PASSWORD: ${{ secrets.AIRFLOW_ADMIN_PASSWORD }}
           AIRFLOW_ADMIN_FIRSTNAME: ${{ secrets.AIRFLOW_ADMIN_FIRSTNAME }}
           AIRFLOW_ADMIN_LASTNAME: ${{ secrets.AIRFLOW_ADMIN_LASTNAME }}
           AIRFLOW_ADMIN_EMAIL: ${{ secrets.AIRFLOW_ADMIN_EMAIL }}
+
           AIRFLOW__CORE__FERNET_KEY: ${{ secrets.AIRFLOW__CORE__FERNET_KEY }}
           AIRFLOW__WEBSERVER__SECRET_KEY: ${{ secrets.AIRFLOW__WEBSERVER__SECRET_KEY }}
           CRON_PRED_SCHEDULE: ${{ secrets.CRON_PRED_SCHEDULE }}
+
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
           OPENAI_EMBED_MODEL: ${{ secrets.OPENAI_EMBED_MODEL }}
           MAX_OUTPUT_TOKENS: ${{ secrets.MAX_OUTPUT_TOKENS }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
           NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
           MLFLOW_EXPERIMENT_ID: ${{ secrets.MLFLOW_EXPERIMENT_ID }}
           MLFLOW_RUN_ID: ${{ secrets.MLFLOW_RUN_ID }}
+          
           TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
           TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
           TWILIO_WHATSAPP_NUMBER: ${{ secrets.TWILIO_WHATSAPP_NUMBER }}

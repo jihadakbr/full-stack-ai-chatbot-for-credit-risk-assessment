@@ -85,7 +85,7 @@ def generate_pie_chart_target(df):
         sizes = df.iloc[:, 1].astype(int)
         labels = [label_map.get(val, str(val)) for val in labels_raw]
 
-        total = sum(sizes)
+        # total = sum(sizes)
 
         # Custom label
         def make_autopct(values):
@@ -301,18 +301,22 @@ def generate_pdf(df, max_cols_per_table=5, meta=None, loan_officer_name="Loan Of
     # Set PDF metadata on creation
     def _set_pdf_metadata(canvas, _doc):
         title = default_meta.get("title")
-        if title: canvas.setTitle(title)
+        if title: 
+            canvas.setTitle(title)
         author = default_meta.get("author")
-        if author: canvas.setAuthor(author)
+        if author: 
+            canvas.setAuthor(author)
         subject = default_meta.get("subject")
-        if subject: canvas.setSubject(subject)
+        if subject: 
+            canvas.setSubject(subject)
         keywords = default_meta.get("keywords")
         if keywords:
             if isinstance(keywords, (list, tuple)):
                 keywords = ", ".join(keywords)
             canvas.setKeywords(keywords)
         creator = default_meta.get("creator")
-        if creator: canvas.setCreator(creator)
+        if creator: 
+            canvas.setCreator(creator)
 
     doc.build(elements, onFirstPage=_set_pdf_metadata, onLaterPages=_set_pdf_metadata)
     buffer.seek(0)
