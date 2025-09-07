@@ -1,0 +1,129 @@
+name: Deploy (Self-hosted)
+
+on:
+  workflow_run:
+    workflows: [ "Build and Push Images" ]
+    types: [ "completed" ]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: [ self-hosted ]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate .env from Secrets
+        run: |
+          cat > .env <<'EOF'
+          # Database for Airflow
+          DB_ADMIN_NAME=${DB_ADMIN_NAME}
+          DB_USER=${DB_USER}
+          DB_PASSWORD=${DB_PASSWORD}
+          DB_PORT=${DB_PORT}
+          DB_DATABASE=${DB_DATABASE}
+          DB_NEW_TABLE=${DB_NEW_TABLE}
+          DB_HOST=${DB_HOST}
+
+          # Airflow
+          AIRFLOW_ADMIN_USERNAME=${AIRFLOW_ADMIN_USERNAME}
+          AIRFLOW_ADMIN_PASSWORD=${AIRFLOW_ADMIN_PASSWORD}
+          AIRFLOW_ADMIN_FIRSTNAME=${AIRFLOW_ADMIN_FIRSTNAME}
+          AIRFLOW_ADMIN_LASTNAME=${AIRFLOW_ADMIN_LASTNAME}
+          AIRFLOW_ADMIN_EMAIL=${AIRFLOW_ADMIN_EMAIL}
+          AIRFLOW__CORE__FERNET_KEY=${AIRFLOW__CORE__FERNET_KEY}
+          AIRFLOW__WEBSERVER__SECRET_KEY=${AIRFLOW__WEBSERVER__SECRET_KEY}
+          CRON_PRED_SCHEDULE=${CRON_PRED_SCHEDULE}
+
+          # Other
+          OPENAI_MODEL=${OPENAI_MODEL}
+          OPENAI_EMBED_MODEL=${OPENAI_EMBED_MODEL}
+          MAX_OUTPUT_TOKENS=${MAX_OUTPUT_TOKENS}
+          OPENAI_API_KEY=${OPENAI_API_KEY}
+            
+          NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
+
+          MLFLOW_EXPERIMENT_ID=${MLFLOW_EXPERIMENT_ID}
+          MLFLOW_RUN_ID=${MLFLOW_RUN_ID}
+
+          TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+          TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+          TWILIO_WHATSAPP_NUMBER=${TWILIO_WHATSAPP_NUMBER}
+          TWILIO_PHONE_NUMBER=${TWILIO_PHONE_NUMBER}
+          MY_WHATSAPP_NUMBER=${MY_WHATSAPP_NUMBER}
+
+          TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+          TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+          TELEGRAM_LIVE_BOT_TOKEN=${TELEGRAM_LIVE_BOT_TOKEN}
+
+          APP_TZ=${APP_TZ}
+          HDFS_NAMENODE=${HDFS_NAMENODE}
+          EOF
+        env:
+          DB_ADMIN_NAME: ${{ secrets.DB_ADMIN_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_NEW_TABLE: ${{ secrets.DB_NEW_TABLE }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          AIRFLOW_ADMIN_USERNAME: ${{ secrets.AIRFLOW_ADMIN_USERNAME }}
+          AIRFLOW_ADMIN_PASSWORD: ${{ secrets.AIRFLOW_ADMIN_PASSWORD }}
+          AIRFLOW_ADMIN_FIRSTNAME: ${{ secrets.AIRFLOW_ADMIN_FIRSTNAME }}
+          AIRFLOW_ADMIN_LASTNAME: ${{ secrets.AIRFLOW_ADMIN_LASTNAME }}
+          AIRFLOW_ADMIN_EMAIL: ${{ secrets.AIRFLOW_ADMIN_EMAIL }}
+          AIRFLOW__CORE__FERNET_KEY: ${{ secrets.AIRFLOW__CORE__FERNET_KEY }}
+          AIRFLOW__WEBSERVER__SECRET_KEY: ${{ secrets.AIRFLOW__WEBSERVER__SECRET_KEY }}
+          CRON_PRED_SCHEDULE: ${{ secrets.CRON_PRED_SCHEDULE }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          OPENAI_EMBED_MODEL: ${{ secrets.OPENAI_EMBED_MODEL }}
+          MAX_OUTPUT_TOKENS: ${{ secrets.MAX_OUTPUT_TOKENS }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          NGROK_AUTHTOKEN: ${{ secrets.NGROK_AUTHTOKEN }}
+          MLFLOW_EXPERIMENT_ID: ${{ secrets.MLFLOW_EXPERIMENT_ID }}
+          MLFLOW_RUN_ID: ${{ secrets.MLFLOW_RUN_ID }}
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_WHATSAPP_NUMBER: ${{ secrets.TWILIO_WHATSAPP_NUMBER }}
+          TWILIO_PHONE_NUMBER: ${{ secrets.TWILIO_PHONE_NUMBER }}
+          MY_WHATSAPP_NUMBER: ${{ secrets.MY_WHATSAPP_NUMBER }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_LIVE_BOT_TOKEN: ${{ secrets.TELEGRAM_LIVE_BOT_TOKEN }}
+          APP_TZ: ${{ secrets.APP_TZ }}
+          HDFS_NAMENODE: ${{ secrets.HDFS_NAMENODE }}
+
+      - name: Replace OWNER/REPO placeholders
+        run: |
+          sed -i "s/\${OWNER}/${{ github.repository_owner }}/g" docker-compose.deploy.yml
+          sed -i "s/\${REPO}/${{ github.event.repository.name }}/g" docker-compose.deploy.yml
+
+      - name: Pull & start stack
+        run: |
+          docker compose -f docker-compose.deploy.yml --env-file .env pull
+          docker compose -f docker-compose.deploy.yml --env-file .env up -d --remove-orphans
+
+      - name: Show containers
+        run: docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}"
+
+      - name: Tail logs
+        run: |
+          docker compose -f docker-compose.deploy.yml logs --tail=80 airflow-webserver || true
+          docker compose -f docker-compose.deploy.yml logs --tail=80 airflow-scheduler || true
+          docker compose -f docker-compose.deploy.yml logs --tail=80 loan_chatbot || true
