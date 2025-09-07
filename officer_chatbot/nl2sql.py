@@ -2,8 +2,9 @@ import re
 
 from langchain_openai import ChatOpenAI
 
-from officer_chatbot.telegram_utils import (
-    MAX_OUTPUT_TOKENS,  # module
+from officer_chatbot.telegram_utils import MAX_OUTPUT_TOKENS  # module
+
+from officer_chatbot.telegram_utils import (  # isort: skip
     MODEL_NAME,
     OPENAI_API_KEY,
     contains_loan_keyword,

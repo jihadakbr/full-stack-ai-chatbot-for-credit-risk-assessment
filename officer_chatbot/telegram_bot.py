@@ -6,7 +6,12 @@ from langchain.prompts import PromptTemplate
 from langchain_community.vectorstores import FAISS
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from telegram import InputFile, Update
-from telegram.ext import (
+
+from airflow.dags.db import query_db  # module
+from officer_chatbot.nl2sql import natural_to_sql  # module
+from officer_chatbot.telegram_utils import EMBED_MODEL  # module
+
+from telegram.ext import (  # isort: skip
     ApplicationBuilder,
     CommandHandler,
     ContextTypes,
@@ -14,10 +19,7 @@ from telegram.ext import (
     filters,
 )
 
-from airflow.dags.db import query_db  # module
-from officer_chatbot.nl2sql import natural_to_sql  # module
-from officer_chatbot.telegram_utils import (
-    EMBED_MODEL,  # module
+from officer_chatbot.telegram_utils import (  # isort: skip
     MAX_OUTPUT_TOKENS,
     MODEL_NAME,
     OPENAI_API_KEY,

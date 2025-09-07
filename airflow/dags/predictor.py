@@ -1,4 +1,4 @@
-from credit_model import (
+from credit_model import (  # isort: skip
     explain_prediction,
     get_input_schema,
     get_model,
