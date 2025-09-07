@@ -1,4 +1,4 @@
-from pathlib import Path # top
+from pathlib import Path  # top
 import os
 import io
 import json
@@ -58,7 +58,7 @@ def estimate_cost(input_tokens: int, output_tokens: int) -> float:
     )
 
 
-# Loan keywords 
+# Loan keywords
 with open(KEYWORDS_PATH, "r") as _f:
     _keywords = json.load(_f)
 LOAN_KEYWORDS = [kw.lower() for kw in _keywords.get("loan_keywords", [])]
@@ -75,10 +75,7 @@ def contains_loan_keyword(message: str) -> bool:
 def generate_pie_chart_target(df):
     try:
         # Mapping 0/1 to readable labels
-        label_map = {
-            0: "Non-Default",
-            1: "Default"
-        }
+        label_map = {0: "Non-Default", 1: "Default"}
 
         # Clean input
         labels_raw = df.iloc[:, 0].fillna("Unknown").astype(int)
@@ -91,7 +88,8 @@ def generate_pie_chart_target(df):
         def make_autopct(values):
             def my_autopct(pct):
                 absolute = int(round(pct / 100.0 * sum(values)))
-                return f'{pct:.1f}% ({absolute:,})'
+                return f"{pct:.1f}% ({absolute:,})"
+
             return my_autopct
 
         fig, ax = plt.subplots(figsize=(6, 6))
@@ -101,16 +99,16 @@ def generate_pie_chart_target(df):
             autopct=make_autopct(sizes),
             startangle=90,
             colors=["#72B5D7", "#E88A89"],
-            textprops={'fontsize': 12}
+            textprops={"fontsize": 12},
         )
 
         plt.setp(autotexts, size=12, weight="bold")
-        ax.axis('equal')
+        ax.axis("equal")
         plt.title("Defaults vs Non-Defaults", fontsize=15, weight="bold", pad=30)
 
         # Save to buffer
         buf = io.BytesIO()
-        plt.savefig(buf, format='png', bbox_inches='tight')
+        plt.savefig(buf, format="png", bbox_inches="tight")
         buf.seek(0)
         plt.close(fig)
 
@@ -118,6 +116,7 @@ def generate_pie_chart_target(df):
     except Exception as e:
         print(f"[Chart Error] {e}")
         return None
+
 
 def generate_bar(df: pd.DataFrame) -> BytesIO | None:
     if df.empty or df.shape[1] != 2:
@@ -148,11 +147,13 @@ def generate_bar(df: pd.DataFrame) -> BytesIO | None:
             f"{width:.2f}",
             va="center",
             ha="left",
-            fontsize=9
+            fontsize=9,
         )
 
     # Style
-    ax.set_title(f"{y_col.replace('_', ' ').title()} by {x_col.replace('_', ' ').title()}")
+    ax.set_title(
+        f"{y_col.replace('_', ' ').title()} by {x_col.replace('_', ' ').title()}"
+    )
     ax.set_xlabel("")
     ax.set_ylabel("")
     ax.grid(False)
@@ -160,8 +161,8 @@ def generate_bar(df: pd.DataFrame) -> BytesIO | None:
     for spine in ax.spines.values():
         spine.set_visible(False)
 
-    ax.tick_params(axis='x', bottom=False, labelbottom=False)
-    ax.tick_params(axis='y', left=False)
+    ax.tick_params(axis="x", bottom=False, labelbottom=False)
+    ax.tick_params(axis="y", left=False)
 
     buf = BytesIO()
     plt.tight_layout()
@@ -170,6 +171,7 @@ def generate_bar(df: pd.DataFrame) -> BytesIO | None:
     plt.close()
 
     return buf
+
 
 def generate_histogram(df: pd.DataFrame) -> BytesIO | None:
     # expects a single numeric column
@@ -184,14 +186,16 @@ def generate_histogram(df: pd.DataFrame) -> BytesIO | None:
 
     plt.clf()
     fig, ax = plt.subplots()
-    
+
     ## ===== Original Data – No Capping Applied
     # ax.hist(df[col], bins=20, edgecolor="white", color="blue")
     ## =====
 
     ## ===== 99.5% Data (Capping extreme outliers at the top 0.5%)
-    lo, hi = np.nanpercentile(df[col], [1, 99])  # or [0, 99.5] 
-    ax.hist(df[col].clip(lo, hi), bins=20, edgecolor="white", color="blue", range=(lo, hi))
+    lo, hi = np.nanpercentile(df[col], [1, 99])  # or [0, 99.5]
+    ax.hist(
+        df[col].clip(lo, hi), bins=20, edgecolor="white", color="blue", range=(lo, hi)
+    )
     ax.set_xlim(lo, hi)
     ax.margins(x=0)
     ## =====
@@ -204,7 +208,7 @@ def generate_histogram(df: pd.DataFrame) -> BytesIO | None:
     for spine in ax.spines.values():
         spine.set_visible(False)
 
-    ax.tick_params(axis='y', left=False, labelleft=False)
+    ax.tick_params(axis="y", left=False, labelleft=False)
 
     buf = BytesIO()
     plt.tight_layout()
@@ -213,6 +217,7 @@ def generate_histogram(df: pd.DataFrame) -> BytesIO | None:
     plt.close()
 
     return buf
+
 
 def generate_scatter(df: pd.DataFrame) -> BytesIO | None:
     # expects two numeric columns
@@ -239,7 +244,9 @@ def generate_scatter(df: pd.DataFrame) -> BytesIO | None:
     except Exception:
         pass  # if fit fails, just show points
 
-    ax.set_title(f"{y_col.replace('_', ' ').title()} vs {x_col.replace('_', ' ').title()}")
+    ax.set_title(
+        f"{y_col.replace('_', ' ').title()} vs {x_col.replace('_', ' ').title()}"
+    )
     ax.set_xlabel("")
     ax.set_ylabel("")
     ax.grid(False)
@@ -255,6 +262,7 @@ def generate_scatter(df: pd.DataFrame) -> BytesIO | None:
 
     return buf
 
+
 def generate_pdf(df, max_cols_per_table=5, meta=None, loan_officer_name="Loan Officer"):
     """
     Generates a PDF with default metadata tailored for loan officers.
@@ -262,11 +270,11 @@ def generate_pdf(df, max_cols_per_table=5, meta=None, loan_officer_name="Loan Of
     """
     # --- default, loan-officer-friendly metadata ---
     default_meta = {
-        "title":   "Loan Data Summary",
-        "author":  loan_officer_name,
+        "title": "Loan Data Summary",
+        "author": loan_officer_name,
         "subject": "Summary",
         "keywords": ["loan", "underwriting", "application", "risk", "credit"],
-        "creator": "Loan Ops PDF Generator"
+        "creator": "Loan Ops PDF Generator",
     }
     if meta:
         default_meta.update(meta)
@@ -286,14 +294,18 @@ def generate_pdf(df, max_cols_per_table=5, meta=None, loan_officer_name="Loan Of
         data = [subset.columns.tolist()] + subset.values.tolist()
 
         table = Table(data)
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor("#d3d3d3")),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.black),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 10),
-            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ]))
+        table.setStyle(
+            TableStyle(
+                [
+                    ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#d3d3d3")),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.black),
+                    ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+                    ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+                    ("BOTTOMPADDING", (0, 0), (-1, 0), 10),
+                    ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ]
+            )
+        )
 
         elements.append(table)
         elements.append(Spacer(1, 12))
@@ -301,13 +313,13 @@ def generate_pdf(df, max_cols_per_table=5, meta=None, loan_officer_name="Loan Of
     # Set PDF metadata on creation
     def _set_pdf_metadata(canvas, _doc):
         title = default_meta.get("title")
-        if title: 
+        if title:
             canvas.setTitle(title)
         author = default_meta.get("author")
-        if author: 
+        if author:
             canvas.setAuthor(author)
         subject = default_meta.get("subject")
-        if subject: 
+        if subject:
             canvas.setSubject(subject)
         keywords = default_meta.get("keywords")
         if keywords:
@@ -315,10 +327,9 @@ def generate_pdf(df, max_cols_per_table=5, meta=None, loan_officer_name="Loan Of
                 keywords = ", ".join(keywords)
             canvas.setKeywords(keywords)
         creator = default_meta.get("creator")
-        if creator: 
+        if creator:
             canvas.setCreator(creator)
 
     doc.build(elements, onFirstPage=_set_pdf_metadata, onLaterPages=_set_pdf_metadata)
     buffer.seek(0)
     return buffer
-

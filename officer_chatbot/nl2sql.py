@@ -1,7 +1,12 @@
 import re
 from langchain_openai import ChatOpenAI
-from officer_chatbot.telegram_utils import (OPENAI_API_KEY, MODEL_NAME, MAX_OUTPUT_TOKENS, 
-                                            contains_loan_keyword, count_tokens) # module
+from officer_chatbot.telegram_utils import (
+    OPENAI_API_KEY,
+    MODEL_NAME,
+    MAX_OUTPUT_TOKENS,
+    contains_loan_keyword,
+    count_tokens,
+)  # module
 
 COLUMNS = [
     "SK_ID_CURR",
@@ -16,8 +21,7 @@ COLUMNS = [
     "OCCUPATION_TYPE",
 ]
 
-PROMPT_TEMPLATE = (
-    """
+PROMPT_TEMPLATE = """
 You are a SQL assistant for PostgreSQL.
 Translate the following natural language question into a syntactically correct SQL query.
 Follow these rules carefully:
@@ -45,7 +49,6 @@ Follow these rules carefully:
 Question: {question}
 SQL Query:
 """
-)
 
 # Init LLM once
 _llm = ChatOpenAI(
@@ -60,7 +63,7 @@ def _quote_columns(sql: str) -> str:
     # Ensure all known columns are quoted
     out = sql
     for col in COLUMNS + ["TARGET"]:
-        pattern = rf'(?<!\")\b{col}\b(?!\")'
+        pattern = rf"(?<!\")\b{col}\b(?!\")"
         out = re.sub(pattern, f'"{col}"', out)
     return out.strip()
 
@@ -77,22 +80,34 @@ def natural_to_sql(question: str, allow_gpt_fallback: bool = True) -> dict:
     # Fast paths
     if "loan" in lowered and "volume" in lowered:
         sql = (
-            'SELECT '
+            "SELECT "
             '(SELECT COUNT(*) FROM clean_data) AS "Existing Borrowers", '
             '(SELECT COUNT(*) FROM new_applicants_clean_data) AS "New Borrowers", '
             '((SELECT COUNT(*) FROM clean_data) + (SELECT COUNT(*) FROM new_applicants_clean_data)) AS "Total"'
         )
-        return {"sql": sql, "used_gpt": False, "input_tokens": 0, "output_tokens": 0, "cost_usd": 0.0}
+        return {
+            "sql": sql,
+            "used_gpt": False,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cost_usd": 0.0,
+        }
 
     if "defaults" in lowered and "non-defaults" in lowered:
         sql = (
             'SELECT "TARGET", COUNT(*) AS count\n'
-            'FROM clean_data\n'
+            "FROM clean_data\n"
             'WHERE "TARGET" IS NOT NULL\n'
             'GROUP BY "TARGET"\n'
             'ORDER BY "TARGET"'
         )
-        return {"sql": sql, "used_gpt": False, "input_tokens": 0, "output_tokens": 0, "cost_usd": 0.0}
+        return {
+            "sql": sql,
+            "used_gpt": False,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cost_usd": 0.0,
+        }
 
     if not allow_gpt_fallback:
         raise Exception("🔍 GPT fallback disabled. No matching logic.")
