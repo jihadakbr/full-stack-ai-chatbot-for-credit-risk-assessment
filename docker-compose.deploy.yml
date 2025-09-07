@@ -42,7 +42,7 @@ services:
 
   ########## Airflow (webserver) ##########
   airflow-webserver:
-    image: ghcr.io/${OWNER}/${REPO}/airflow:latest
+    image: ghcr.io/jihadakbr/full-stack-ai-chatbot-for-credit-risk-assessment/airflow:latest
     container_name: airflow-webserver
     user: "50000:0"
     env_file: .env
@@ -109,7 +109,7 @@ services:
 
   ########## Airflow (scheduler) ##########
   airflow-scheduler:
-    image: ghcr.io/${OWNER}/${REPO}/airflow:latest
+    image: ghcr.io/jihadakbr/full-stack-ai-chatbot-for-credit-risk-assessment/airflow:latest
     container_name: airflow-scheduler
     user: "50000:0"
     env_file: .env
@@ -158,7 +158,7 @@ services:
 
   ########## App container (the image from GHCR) ##########
   loan_chatbot:
-    image: ghcr.io/${OWNER}/${REPO}/app:latest
+    image: ghcr.io/jihadakbr/full-stack-ai-chatbot-for-credit-risk-assessment/app:latest
     container_name: loan_chatbot
     env_file: .env
     depends_on:
