@@ -44,6 +44,9 @@ CLEAN_DIR = DATA_ROOT / "clean"
 RAW_DIR.mkdir(parents=True, exist_ok=True)
 CLEAN_DIR.mkdir(parents=True, exist_ok=True)
 
+raw_schedule = os.getenv("CRON_PRED_SCHEDULE")
+SCHEDULE = None if raw_schedule in (None, "None") else raw_schedule
+
 default_args = {
     "owner": "airflow",
     "depends_on_past": False,
@@ -56,7 +59,7 @@ dag = DAG(
     dag_id="credit_risk_pipeline",
     default_args=default_args,
     # schedule_interval="*/5 * * * *",  # every 5 minutes
-    schedule_interval=None,
+    schedule_interval=SCHEDULE,
     start_date=days_ago(1),
     catchup=False,
     description="Local: Kafka -> raw jsonl -> clean parquet -> predict",
