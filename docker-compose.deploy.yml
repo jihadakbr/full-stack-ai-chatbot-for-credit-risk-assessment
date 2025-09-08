@@ -1,3 +1,5 @@
+name: loan_stack
+
 networks:
   loan_net:
     driver: bridge
