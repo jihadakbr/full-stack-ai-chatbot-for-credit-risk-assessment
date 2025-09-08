@@ -48,7 +48,9 @@ jobs:
           AIRFLOW_ADMIN_LASTNAME=${AIRFLOW_ADMIN_LASTNAME}
           AIRFLOW_ADMIN_EMAIL=${AIRFLOW_ADMIN_EMAIL}
 
-          # ----- Airflow settings -----
+          # ----- Airflow security -----
+          AIRFLOW__CORE__FERNET_KEY=${AIRFLOW__CORE__FERNET_KEY}
+          AIRFLOW__WEBSERVER__SECRET_KEY=${AIRFLOW__WEBSERVER__SECRET_KEY}
           CRON_PRED_SCHEDULE=${CRON_PRED_SCHEDULE}
 
           # ----- Models / OpenAI -----
@@ -91,6 +93,8 @@ jobs:
           AIRFLOW_ADMIN_LASTNAME: ${{ secrets.AIRFLOW_ADMIN_LASTNAME }}
           AIRFLOW_ADMIN_EMAIL: ${{ secrets.AIRFLOW_ADMIN_EMAIL }}
 
+          AIRFLOW__CORE__FERNET_KEY: ${{ secrets.AIRFLOW__CORE__FERNET_KEY }}
+          AIRFLOW__WEBSERVER__SECRET_KEY: ${{ secrets.AIRFLOW__WEBSERVER__SECRET_KEY }}
           CRON_PRED_SCHEDULE: ${{ secrets.CRON_PRED_SCHEDULE }}
 
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}

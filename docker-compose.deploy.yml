@@ -100,6 +100,7 @@ services:
       - ./model_deployment:/app/model_deployment:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
+      - "DESKTOP-85G9BVS.localdomain:host-gateway"
     command: >
       bash -c "
         airflow db migrate &&
@@ -156,6 +157,7 @@ services:
     command: airflow scheduler
     extra_hosts:
       - "host.docker.internal:host-gateway"
+      - "DESKTOP-85G9BVS.localdomain:host-gateway"
     networks: [ loan_net ]
 
   ########## App container (the image from GHCR) ##########
