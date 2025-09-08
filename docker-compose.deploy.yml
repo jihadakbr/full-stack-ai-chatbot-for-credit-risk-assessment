@@ -186,4 +186,5 @@ services:
       - "4040:4040"
     extra_hosts:
       - "host.docker.internal:host-gateway"
+      - "DESKTOP-85G9BVS.localdomain:host-gateway"
     networks: [ loan_net ]
