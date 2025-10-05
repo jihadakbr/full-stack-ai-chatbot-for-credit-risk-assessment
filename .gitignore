@@ -43,6 +43,7 @@ dataset/*
 notebook/*
 !notebook/03 - EDA.ipynb
 !notebook/04 - ML.ipynb
+!notebook/11 - Sentiment Analysis - G Collab.ipynb
 
 ## One-offs
 officer_chatbot/xxtexx_playground.ipynb
