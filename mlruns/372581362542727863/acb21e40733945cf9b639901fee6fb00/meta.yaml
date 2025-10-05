@@ -1,0 +1,14 @@
+artifact_uri: mlflow-artifacts:/372581362542727863/acb21e40733945cf9b639901fee6fb00/artifacts
+end_time: 1759683443861
+entry_point_name: ''
+experiment_id: '372581362542727863'
+lifecycle_stage: active
+run_id: acb21e40733945cf9b639901fee6fb00
+run_name: roberta_inference
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1759683428700
+status: 3
+tags: []
+user_id: root

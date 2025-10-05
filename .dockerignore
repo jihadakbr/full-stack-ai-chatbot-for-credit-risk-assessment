@@ -23,6 +23,8 @@ mlruns/*
 mlruns/787990574769484173/*
 !mlruns/787990574769484173/37d2cbaaf3c94eceb7e1a1bc2f09d9ea/
 !mlruns/787990574769484173/37d2cbaaf3c94eceb7e1a1bc2f09d9ea/**
+## Sentiment Analysis
+!mlruns/372581362542727863/
 
 # Generated artifacts
 **/*.pdf
