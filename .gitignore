@@ -46,6 +46,7 @@ notebook/*
 !notebook/03 - EDA.ipynb
 !notebook/04 - ML.ipynb
 !notebook/11 - Sentiment Analysis - G Collab.ipynb
+!notebook/12 - Credit Risk Prediction - Score Card.ipynb
 
 ## One-offs
 officer_chatbot/xxtexx_playground.ipynb
